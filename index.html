@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#126b5e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="泰英口语教练" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>泰英口语教练</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">每天早上 9:00 · 60 分钟</p>
+          <h1>泰英口语教练</h1>
+        </div>
+        <button class="streak" type="button" id="streakButton" aria-label="查看连续学习天数">🔥 <span id="streakCount">0</span></button>
+      </header>
+
+      <section id="home" class="screen active" aria-labelledby="homeTitle">
+        <div class="hero-card">
+          <p class="tag">今天的主题</p>
+          <h2 id="homeTitle">餐厅点餐</h2>
+          <p>用英语和泰语，自信地完成一次点餐。</p>
+          <div class="time-row"><span>英语 30 分钟</span><span>泰语 30 分钟</span></div>
+          <button class="primary" type="button" data-nav="lesson">开始今天的学习 <span>→</span></button>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading"><h2>今日待复习</h2><button class="text-button" type="button" data-nav="review">全部查看</button></div>
+          <div id="homeReviewList" class="mini-list"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading"><h2>快捷入口</h2></div>
+          <div class="quick-grid">
+            <button class="quick-card" type="button" data-nav="words"><span>📚</span>单词本</button>
+            <button class="quick-card" type="button" data-nav="mistakes"><span>✎</span>错题本</button>
+            <button class="quick-card" type="button" data-nav="progress"><span>◔</span>学习进度</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="lesson" class="screen" aria-labelledby="lessonTitle">
+        <div class="screen-title"><div><p class="eyebrow">第 1 天 · 餐厅点餐</p><h2 id="lessonTitle">今天的课程</h2></div><span id="lessonTime">0 / 60 分钟</span></div>
+        <div class="progress-track"><div id="lessonProgress"></div></div>
+        <div id="lessonList" class="lesson-list"></div>
+        <div class="ai-card">
+          <div><p class="tag">AI 对话练习</p><h3>现在就开口说</h3><p>打开 ChatGPT 后，说“开始今天的学习”，然后用语音回答。</p></div>
+          <button class="primary small" id="openChatGPT" type="button">打开 AI 对话</button>
+        </div>
+        <button class="outline" id="finishLesson" type="button">完成今天的学习</button>
+      </section>
+
+      <section id="words" class="screen" aria-labelledby="wordsTitle">
+        <div class="screen-title"><div><p class="eyebrow">自动保存在这台手机</p><h2 id="wordsTitle">单词本</h2></div><button class="icon-button" id="addWord" type="button" aria-label="添加单词">＋</button></div>
+        <div class="segmented" role="tablist"><button class="selected" type="button" data-word-filter="all">全部</button><button type="button" data-word-filter="new">新学</button><button type="button" data-word-filter="reviewing">复习中</button><button type="button" data-word-filter="mastered">已掌握</button></div>
+        <div id="wordList" class="word-list"></div>
+      </section>
+
+      <section id="review" class="screen" aria-labelledby="reviewTitle">
+        <div class="screen-title"><div><p class="eyebrow">间隔复习 · 第 1、3、7、14、30 天</p><h2 id="reviewTitle">复习清单</h2></div></div>
+        <p class="helper">每完成一个词，就点一下“已复习”。</p>
+        <div id="reviewList" class="review-list"></div>
+      </section>
+
+      <section id="mistakes" class="screen" aria-labelledby="mistakesTitle">
+        <div class="screen-title"><div><p class="eyebrow">把错题变成会说的话</p><h2 id="mistakesTitle">错题本</h2></div><button class="icon-button" id="addMistake" type="button" aria-label="添加错题">＋</button></div>
+        <div id="mistakeList" class="mistake-list"></div>
+      </section>
+
+      <section id="progress" class="screen" aria-labelledby="progressTitle">
+        <div class="screen-title"><div><p class="eyebrow">你的学习积累</p><h2 id="progressTitle">学习进度</h2></div></div>
+        <div class="stat-grid">
+          <div class="stat-card"><strong id="daysLearned">0</strong><span>学习天数</span></div>
+          <div class="stat-card"><strong id="minutesLearned">0</strong><span>累计分钟</span></div>
+          <div class="stat-card"><strong id="wordsLearned">0</strong><span>记录单词</span></div>
+          <div class="stat-card"><strong id="mistakesLearned">0</strong><span>错题记录</span></div>
+        </div>
+        <section class="progress-card"><h3>本周目标</h3><div class="week-dots" id="weekDots"></div><p id="weekMessage">完成今天的课程，开启你的第一个学习日。</p></section>
+        <button class="outline danger" id="resetData" type="button">清除本机学习数据</button>
+      </section>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="active" type="button" data-nav="home"><span>⌂</span>首页</button>
+        <button type="button" data-nav="lesson"><span>▶</span>课程</button>
+        <button type="button" data-nav="words"><span>▤</span>单词</button>
+        <button type="button" data-nav="review"><span>↻</span>复习</button>
+        <button type="button" data-nav="progress"><span>◔</span>进度</button>
+      </nav>
+    </main>
+    <dialog id="entryDialog"><form method="dialog" id="entryForm"><div class="dialog-head"><h2 id="dialogTitle">添加单词</h2><button class="close" value="cancel" aria-label="关闭">×</button></div><label id="fieldOneLabel">单词<input id="fieldOne" required /></label><label id="fieldTwoLabel">中文意思<input id="fieldTwo" required /></label><label id="fieldThreeLabel">拼读提示（泰语可填写）<input id="fieldThree" /></label><button class="primary" value="default" type="submit">保存</button></form></dialog>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

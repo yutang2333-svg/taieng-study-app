@@ -1,0 +1,37 @@
+const KEY = 'taieng-coach-v1';
+const today = new Date().toISOString().slice(0, 10);
+const starterWords = [
+  { id: 1, language: '英语', word: 'menu', meaning: '菜单', hint: '梅纽', status: 'new', reviews: 0 },
+  { id: 2, language: '英语', word: 'recommend', meaning: '推荐', hint: '瑞克曼德', status: 'new', reviews: 0 },
+  { id: 3, language: '泰语', word: 'เมนู', meaning: '菜单', hint: 'mee-nuu（米努）', status: 'new', reviews: 0 },
+  { id: 4, language: '泰语', word: 'อร่อย', meaning: '好吃', hint: 'a-ròi（阿洛伊）', status: 'new', reviews: 0 }
+];
+const starterMistakes = [{ id: 1, wrong: 'I want this.', better: 'Could I have this, please?', note: '点餐时加上 could I have… 更礼貌自然。' }];
+const lessonParts = [
+  ['英语复习', '复习昨天的 3 个旅行词汇', 5], ['英语新词', 'menu、recommend、allergic 等 5 个实用词', 8], ['英语对话', '在餐厅点餐：你是顾客，AI 是服务员', 12], ['英语纠错', '复述并修正今天出现的问题', 5],
+  ['泰语复习', '复习已学泰语词和拼读', 5], ['泰语新词', 'เมนู（菜单）、อร่อย（好吃）等 5 个词', 8], ['泰语跟读', '跟读泰文、拼读提示和声调', 7], ['泰语对话', '用泰语点一份简单的餐', 5], ['泰语纠错', '整理发音或用词问题', 5]
+];
+function defaults() { return { words: starterWords, mistakes: starterMistakes, completedDates: [], lessonChecks: {}, activeFilter: 'all' }; }
+let data = JSON.parse(localStorage.getItem(KEY) || 'null') || defaults();
+const $ = s => document.querySelector(s);
+function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1900); }
+function nav(id) { document.querySelectorAll('.screen').forEach(x => x.classList.toggle('active', x.id === id)); document.querySelectorAll('[data-nav]').forEach(x => x.classList.toggle('active', x.dataset.nav === id && x.closest('.bottom-nav'))); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function statusLabel(status) { return ({ new: '新学', reviewing: '复习中', mastered: '已掌握' })[status]; }
+function renderHome() { $('#homeReviewList').innerHTML = data.words.filter(w => w.status !== 'mastered').slice(0,3).map(w => `<div class="mini-item"><div><strong>${w.word}</strong><small>${w.meaning}</small></div><span class="pill">${statusLabel(w.status)}</span></div>`).join('') || '<p class="helper">没有待复习内容，开始今天的课程吧。</p>'; }
+function renderLesson() { const checks = data.lessonChecks[today] || []; const done = checks.filter(Boolean).length; const minutes = lessonParts.filter((_, i) => checks[i]).reduce((a, x) => a + x[2], 0); $('#lessonTime').textContent = `${minutes} / 60 分钟`; $('#lessonProgress').style.width = `${done / lessonParts.length * 100}%`; $('#lessonList').innerHTML = lessonParts.map((x, i) => `<label class="lesson-item"><input type="checkbox" data-lesson="${i}" ${checks[i] ? 'checked' : ''}><div><strong>${x[0]}</strong><p>${x[1]}</p></div><span class="minutes">${x[2]} 分钟</span></label>`).join(''); }
+function renderWords() { const items = data.words.filter(w => data.activeFilter === 'all' || w.status === data.activeFilter); $('#wordList').innerHTML = items.map(w => `<article class="word-item"><div class="word-main"><strong>${w.word} <small>${w.language}</small></strong><small>${w.meaning}${w.hint ? ' · ' + w.hint : ''}</small></div><button class="status-button" data-status="${w.id}">${statusLabel(w.status)}</button></article>`).join('') || '<p class="helper">还没有这一类单词。</p>'; document.querySelectorAll('[data-word-filter]').forEach(b => b.classList.toggle('selected', b.dataset.wordFilter === data.activeFilter)); }
+function renderReview() { const items = data.words.filter(w => w.status !== 'mastered'); $('#reviewList').innerHTML = items.map(w => `<article class="review-item"><div class="review-main"><strong>${w.word}</strong><small>${w.meaning}${w.hint ? ' · ' + w.hint : ''}</small></div><button class="status-button" data-review="${w.id}">已复习</button></article>`).join('') || '<p class="helper">太棒了，今天没有待复习的单词。</p>'; }
+function renderMistakes() { $('#mistakeList').innerHTML = data.mistakes.map(m => `<article class="mistake-item"><h3>原句：${m.wrong}</h3><p class="better">更自然：${m.better}</p><p>${m.note}</p></article>`).join('') || '<p class="helper">暂时没有错题记录。</p>'; }
+function renderProgress() { const days = data.completedDates.length; $('#daysLearned').textContent = days; $('#minutesLearned').textContent = days * 60; $('#wordsLearned').textContent = data.words.length; $('#mistakesLearned').textContent = data.mistakes.length; $('#streakCount').textContent = days; const names = ['一','二','三','四','五','六','日']; $('#weekDots').innerHTML = names.map((n,i) => `<span class="${i < Math.min(days,7) ? 'done' : ''}">${n}</span>`).join(''); $('#weekMessage').textContent = days ? `你已完成 ${days} 天学习，继续保持每天 60 分钟。` : '完成今天的课程，开启你的第一个学习日。'; }
+function render() { renderHome(); renderLesson(); renderWords(); renderReview(); renderMistakes(); renderProgress(); }
+function openDialog(type) { const dialog = $('#entryDialog'); $('#entryForm').dataset.type = type; $('#dialogTitle').textContent = type === 'word' ? '添加单词' : '添加错题'; $('#fieldOneLabel').childNodes[0].nodeValue = type === 'word' ? '单词' : '原句'; $('#fieldTwoLabel').childNodes[0].nodeValue = type === 'word' ? '中文意思' : '更自然的说法'; $('#fieldThreeLabel').childNodes[0].nodeValue = type === 'word' ? '拼读提示（泰语可填写）' : '为什么需要改'; $('#fieldOne').value = ''; $('#fieldTwo').value = ''; $('#fieldThree').value = ''; dialog.showModal(); }
+document.addEventListener('click', e => { const navButton = e.target.closest('[data-nav]'); if (navButton) nav(navButton.dataset.nav); const filter = e.target.closest('[data-word-filter]'); if (filter) { data.activeFilter = filter.dataset.wordFilter; save(); } const status = e.target.closest('[data-status]'); if (status) { const w = data.words.find(x => x.id === Number(status.dataset.status)); w.status = w.status === 'new' ? 'reviewing' : w.status === 'reviewing' ? 'mastered' : 'new'; save(); } const review = e.target.closest('[data-review]'); if (review) { const w = data.words.find(x => x.id === Number(review.dataset.review)); w.reviews++; w.status = w.reviews >= 3 ? 'mastered' : 'reviewing'; save(); toast(w.status === 'mastered' ? '这个词已掌握！' : '已加入下一轮复习'); } });
+document.addEventListener('change', e => { if (e.target.matches('[data-lesson]')) { data.lessonChecks[today] ||= []; data.lessonChecks[today][Number(e.target.dataset.lesson)] = e.target.checked; save(); } });
+$('#addWord').onclick = () => openDialog('word'); $('#addMistake').onclick = () => openDialog('mistake');
+$('#entryForm').addEventListener('submit', e => { e.preventDefault(); const type = e.currentTarget.dataset.type; const a = $('#fieldOne').value.trim(), b = $('#fieldTwo').value.trim(), c = $('#fieldThree').value.trim(); if (type === 'word') data.words.unshift({ id: Date.now(), language: '自定义', word: a, meaning: b, hint: c, status: 'new', reviews: 0 }); else data.mistakes.unshift({ id: Date.now(), wrong: a, better: b, note: c || '下次注意这个表达。' }); $('#entryDialog').close(); save(); toast('已保存'); });
+$('#finishLesson').onclick = () => { if (!data.completedDates.includes(today)) data.completedDates.push(today); data.lessonChecks[today] = lessonParts.map(() => true); save(); toast('今天的学习已完成，做得很好！'); };
+$('#openChatGPT').onclick = () => { const prompt = '我是泰英口语教练的学习者。请开始今天的学习：主题是餐厅点餐。按英语30分钟、泰语30分钟安排，一次只给我一步，并记录单词、错题和进度。'; navigator.clipboard?.writeText(prompt); window.open('https://chatgpt.com/', '_blank'); toast('学习指令已复制，打开后粘贴发送'); };
+$('#resetData').onclick = () => { if (confirm('确定清除这台手机上的所有学习记录吗？')) { data = defaults(); save(); toast('学习数据已清除'); } };
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+render();
