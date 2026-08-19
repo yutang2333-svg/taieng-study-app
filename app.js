@@ -66,5 +66,5 @@ $('#entryForm').addEventListener('submit', e => { e.preventDefault(); const type
 $('#finishLesson').onclick = () => { if (!data.completedDates.includes(today)) data.completedDates.push(today); data.lessonChecks[today] = lessonParts(plan()).map(() => true); save(); toast(data.completedDates.length < 30 ? '今天完成！明天将解锁下一课。' : '30 天课程全部完成，太棒了！'); };
 $('#openChatGPT').onclick = () => { const p = plan(); const prompt = `我是泰英口语教练的学习者。请和我练习第 ${p.day} 天「${p.theme}」。先让我用英语完成一个情景对话，再用泰语完成一个情景对话。一次只说一句，并纠正我的错误。`; navigator.clipboard?.writeText(prompt); window.open('https://chatgpt.com/', '_blank'); toast('本课 AI 练习指令已复制'); };
 $('#resetData').onclick = () => { if (confirm('确定清除这台手机上的所有学习记录吗？')) { data = defaults(); save(); toast('学习数据已清除'); } };
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=4');
 render();
