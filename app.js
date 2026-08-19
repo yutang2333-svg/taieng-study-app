@@ -1,13 +1,13 @@
 const KEY = 'taieng-coach-v2';
 const today = new Date().toISOString().slice(0, 10);
 const course = [
-  ['餐厅点餐','在餐厅礼貌点一餐。','Could I have this, please?|我想要这个，谢谢。','What do you recommend?|你推荐什么？','ขออันนี้ค่ะ/ครับ|khǎaw an-níi khâ/khráp｜我想要这个。','อร่อยไหม|a-ròi mái｜好吃吗？'],
+  ['餐厅点餐','在餐厅礼貌点一餐。','Could I have this, please?|我想要这个，谢谢。','What do you recommend?|你推荐什么？','ขออันนี้ค่ะ|khǎaw an-níi khâ｜我想要这个。','อร่อยไหม|a-ròi mái｜好吃吗？'],
   ['咖啡店','点咖啡并说明口味。','I would like an iced latte.|我想要一杯冰拿铁。','Less sweet, please.|请少糖。','กาแฟเย็น|gaa-fae yen｜冰咖啡。','หวานน้อย|wǎan nói｜少甜。'],
-  ['结账','礼貌要求账单并付款。','Could we get the bill, please?|可以给我们账单吗？','Can I pay by card?|我可以刷卡吗？','คิดเงินด้วยค่ะ/ครับ|khít ngern dûai khâ/khráp｜请结账。','จ่ายบัตรได้ไหม|jàai bàt dâai mái｜可以刷卡吗？'],
+  ['结账','礼貌要求账单并付款。','Could we get the bill, please?|可以给我们账单吗？','Can I pay by card?|我可以刷卡吗？','คิดเงินด้วยค่ะ|khít ngern dûai khâ｜请结账。','จ่ายบัตรได้ไหม|jàai bàt dâai mái｜可以刷卡吗？'],
   ['酒店入住','完成入住登记。','I have a reservation.|我有预订。','My name is ___.|我的名字是___。','ฉันจองห้องไว้|chǎn jɔɔng hɔ̂ng wái｜我预订了房间。','ชื่อของฉันคือ___|chʉ̂ʉ khɔ̌ɔng chǎn khʉʉ___｜我的名字是___。'],
   ['房间问题','说明房间需要帮助。','The air conditioner is not working.|空调坏了。','Could someone help me?|可以派人帮我吗？','แอร์ไม่เย็น|ae mâi yen｜空调不凉。','ช่วยหน่อยได้ไหม|chûai nòi dâai mái｜可以帮忙吗？'],
   ['问路','询问目的地怎么走。','How can I get to the station?|怎么去车站？','Is it far from here?|离这里远吗？','ไปสถานีอย่างไร|bpai sà-thǎa-nii yàang-rai｜怎么去车站？','ไกลไหม|glai mái｜远吗？'],
-  ['出租车','告诉司机目的地。','Please take me to this address.|请带我去这个地址。','Please stop here.|请在这里停。','ไปที่นี่ค่ะ/ครับ|bpai thîi-nîi khâ/khráp｜去这里。','จอดที่นี่ค่ะ/ครับ|jɔ̀ɔt thîi-nîi khâ/khráp｜在这里停。'],
+  ['出租车','告诉司机目的地。','Please take me to this address.|请带我去这个地址。','Please stop here.|请在这里停。','ไปที่นี่ค่ะ|bpai thîi-nîi khâ｜去这里。','จอดที่นี่ค่ะ|jɔ̀ɔt thîi-nîi khâ｜在这里停。'],
   ['地铁轻轨','买票、确认线路。','Which line should I take?|我该坐哪条线？','Where do I change trains?|在哪里换乘？','ไปสายไหน|bpai sǎai nǎi｜坐哪条线？','เปลี่ยนรถไฟที่ไหน|bplìan rót-fai thîi-nǎi｜在哪里换乘？'],
   ['机场','办理值机和登机。','Where is the check-in counter?|值机柜台在哪里？','What time does boarding start?|几点开始登机？','เช็กอินที่ไหน|chék-in thîi-nǎi｜在哪里值机？','ขึ้นเครื่องกี่โมง|khʉ̂n khrʉ̂ang gìi moong｜几点登机？'],
   ['买衣服','询问尺码、试穿。','Do you have this in a larger size?|有大一码的吗？','Can I try it on?|我可以试穿吗？','มีไซซ์ใหญ่ไหม|mii sáai yài mái｜有大码吗？','ลองได้ไหม|lɔɔng dâai mái｜可以试吗？'],
@@ -69,9 +69,9 @@ const starterMistakes = [];
 function split(text) { const [word, ...meaning] = text.split('|'); return { word, meaning: meaning.join('|') }; }
 function currentIndex() { return Math.min(data.completedDates.length, course.length - 1); }
 function plan() { const index = currentIndex(), raw = course[index], extra = extraVocabulary[index]; return { day: index + 1, theme: raw[0], goal: raw[1], en: [split(raw[2]), split(raw[3])], th: [split(raw[4]), split(raw[5])], enVocab: extra[0].map(split), thVocab: extra[1].map(split) }; }
-function dialogue(p, language) { return language === '英语' ? ['Hello. How can I help you?', p.en[0].word, 'Sure. Is there anything else?', p.en[1].word] : ['สวัสดีค่ะ/ครับ ต้องการอะไร', p.th[0].word, 'ได้ค่ะ/ครับ มีอะไรอีกไหม', p.th[1].word]; }
+function dialogue(p, language) { return language === '英语' ? ['Hello. How can I help you?', p.en[0].word, 'Sure. Is there anything else?', p.en[1].word] : ['สวัสดีค่ะ ต้องการอะไร', p.th[0].word, 'ได้ค่ะ มีอะไรอีกไหม', p.th[1].word]; }
 function thaiChinese(item) { return item.meaning.split(/[｜|]/)[1] || item.meaning; }
-function extraDrills(p, language) { return language === '英语' ? ['Please repeat that slowly.', `I need ${p.enVocab[0].word}.`, `Where is the ${p.enVocab[1].word}?`, `Can I have ${p.enVocab[2].word}, please?`, 'Thank you. That is helpful.'] : ['พูดช้า ๆ หน่อยได้ไหม', `ขอ${p.thVocab[0].word}ค่ะ/ครับ`, `${p.thVocab[1].word}อยู่ที่ไหน`, `มี${p.thVocab[2].word}ไหม`, 'ขอบคุณมากค่ะ/ครับ']; }
+function extraDrills(p, language) { return language === '英语' ? ['Please repeat that slowly.', `I need ${p.enVocab[0].word}.`, `Where is the ${p.enVocab[1].word}?`, `Can I have ${p.enVocab[2].word}, please?`, 'Thank you. That is helpful.'] : ['พูดช้า ๆ หน่อยได้ไหม', `ขอ${p.thVocab[0].word}ค่ะ`, `${p.thVocab[1].word}อยู่ที่ไหน`, `มี${p.thVocab[2].word}ไหม`, 'ขอบคุณมากค่ะ']; }
 function voiceLine(text, lang) { return { text, lang }; }
 function lessonParts(p) { const enDialogue = dialogue(p, '英语'), thDialogue = dialogue(p, '泰语'), enExtra = extraDrills(p, '英语'), thExtra = extraDrills(p, '泰语'); const thEnglish = ['Hello. What would you like?', p.en[0].word, 'Okay. Is there anything else?', p.en[1].word], thChinese = ['你好，请问需要什么？', thaiChinese(p.th[0]), '好的，还需要别的吗？', thaiChinese(p.th[1])]; return [
   {title:'英语复习', detail:'Listen to the key phrases. Repeat each phrase three times.', minutes:3, lang:'en-US', audio:p.en.map(x => x.word), content:p.en.map(x => x.word).join(' · ')},
@@ -115,5 +115,5 @@ $('#entryForm').addEventListener('submit', e => { e.preventDefault(); const type
 $('#finishLesson').onclick = () => { const parts = lessonParts(plan()), checks = data.lessonChecks[today] || []; if (checks.filter(Boolean).length < parts.length) { toast('请先完成并勾选所有听读环节'); return; } if (!data.completedDates.includes(today)) data.completedDates.push(today); save(); toast(data.completedDates.length < 30 ? '今天完成！明天将解锁下一课。' : '30 天课程全部完成，太棒了！'); };
 $('#openChatGPT').onclick = () => { const p = plan(); const prompt = `我是泰英口语教练的学习者。请和我练习第 ${p.day} 天「${p.theme}」。先让我用英语完成一个情景对话，再用泰语完成一个情景对话。一次只说一句，并纠正我的错误。`; navigator.clipboard?.writeText(prompt); window.open('https://chatgpt.com/', '_blank'); toast('本课 AI 练习指令已复制'); };
 $('#resetData').onclick = () => { if (confirm('确定清除这台手机上的所有学习记录吗？')) { data = defaults(); save(); toast('学习数据已清除'); } };
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=9');
 render();
