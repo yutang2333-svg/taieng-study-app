@@ -70,17 +70,18 @@ function split(text) { const [word, ...meaning] = text.split('|'); return { word
 function currentIndex() { return Math.min(data.completedDates.length, course.length - 1); }
 function plan() { const index = currentIndex(), raw = course[index], extra = extraVocabulary[index]; return { day: index + 1, theme: raw[0], goal: raw[1], en: [split(raw[2]), split(raw[3])], th: [split(raw[4]), split(raw[5])], enVocab: extra[0].map(split), thVocab: extra[1].map(split) }; }
 function dialogue(p, language) { return language === '英语' ? ['Hello. How can I help you?', p.en[0].word, 'Sure. Is there anything else?', p.en[1].word] : ['สวัสดีค่ะ/ครับ ต้องการอะไร', p.th[0].word, 'ได้ค่ะ/ครับ มีอะไรอีกไหม', p.th[1].word]; }
-function lessonParts(p) { const enDialogue = dialogue(p, '英语'), thDialogue = dialogue(p, '泰语'); return [
+function thaiChinese(item) { return item.meaning.split(/[｜|]/)[1] || item.meaning; }
+function lessonParts(p) { const enDialogue = dialogue(p, '英语'), thDialogue = dialogue(p, '泰语'), thMeaning = ['你好，请问需要什么？', thaiChinese(p.th[0]), '好的，还需要别的吗？', thaiChinese(p.th[1])]; return [
   {title:'英语复习', detail:'先听昨日关键句，再跟读三遍。第 1 天会播放本课预热句。', minutes:3, lang:'en-US', audio:p.en.map(x => x.word), content:p.en.map(x => x.word).join(' · ')},
   {title:'英语单词与发音', detail:'逐个听 3 个新词，跟读三遍，再说出中文意思。', minutes:6, lang:'en-US', audio:p.enVocab.map(x => x.word), content:p.enVocab.map(x => `${x.word}（${x.meaning}）`).join(' · ')},
   {title:'英语重点句', detail:'每句听两遍：第一次看中文，第二次遮住中文跟读。', minutes:5, lang:'en-US', audio:p.en.map(x => x.word), content:p.en.map(x => x.word).join(' / ')},
   {title:'英语替换练习', detail:'把句中的物品、数量或偏好替换成你自己的答案，各说三次。', minutes:4, lang:'en-US', audio:[p.en[0].word, p.en[1].word], content:'替换练习：改变一句中的一个词，再完整说出。'},
   {title:'英语情景对话与纠错', detail:'听完四轮对话后，暂停并扮演“学习者”说第 2、4 句；再重读不顺的一句。', minutes:12, lang:'en-US', audio:enDialogue, content:enDialogue.join(' / ')},
   {title:'泰语复习', detail:'先听关键表达，再跟读三遍；注意不要用中文读音代替泰语。', minutes:3, lang:'th-TH', audio:p.th.map(x => x.word), content:p.th.map(x => x.word).join(' · ')},
-  {title:'泰语单词与发音', detail:'逐个听 3 个新词，跟读三遍，再看拼读复述。', minutes:6, lang:'th-TH', audio:p.thVocab.map(x => `${x.word}。${x.meaning.split('|')[0]}`), content:p.thVocab.map(x => `${x.word}（${x.meaning}）`).join(' · ')},
+  {title:'泰语单词与发音', detail:'逐个听 3 个新词的泰文发音，跟读三遍，再看拼读复述。', minutes:6, lang:'th-TH', audio:p.thVocab.map(x => x.word), content:p.thVocab.map(x => `${x.word}（${x.meaning}）`).join(' · ')},
   {title:'泰语重点句', detail:'先慢跟读，再按正常速度读；每句连续三遍。', minutes:5, lang:'th-TH', audio:p.th.map(x => x.word), content:p.th.map(x => x.word).join(' / ')},
   {title:'泰语替换练习', detail:'替换物品或地点，重复整句；先听，后不看文字说。', minutes:4, lang:'th-TH', audio:[p.th[0].word, p.th[1].word], content:'替换练习：用本课 3 个新词替换句中内容。'},
-  {title:'泰语情景对话与纠错', detail:'听四轮对话后，暂停并扮演“学习者”说第 2、4 句；再重读不顺的一句。', minutes:12, lang:'th-TH', audio:thDialogue, content:thDialogue.join(' / ')}
+  {title:'泰语情景对话与纠错', detail:'先看每句中文理解意思，再听四轮对话；暂停并扮演“学习者”说第 2、4 句。', minutes:12, lang:'th-TH', audio:thDialogue, content:thDialogue.map((line, index) => `${line}（${thMeaning[index]}）`).join(' / ')}
 ]; }
 function defaults() { return { words: starterWords, mistakes: starterMistakes, completedDates: [], lessonChecks: {}, activeFilter: 'all' }; }
 let data = JSON.parse(localStorage.getItem(KEY) || 'null') || defaults();
@@ -108,5 +109,5 @@ $('#entryForm').addEventListener('submit', e => { e.preventDefault(); const type
 $('#finishLesson').onclick = () => { const parts = lessonParts(plan()), checks = data.lessonChecks[today] || []; if (checks.filter(Boolean).length < parts.length) { toast('请先完成并勾选所有听读环节'); return; } if (!data.completedDates.includes(today)) data.completedDates.push(today); save(); toast(data.completedDates.length < 30 ? '今天完成！明天将解锁下一课。' : '30 天课程全部完成，太棒了！'); };
 $('#openChatGPT').onclick = () => { const p = plan(); const prompt = `我是泰英口语教练的学习者。请和我练习第 ${p.day} 天「${p.theme}」。先让我用英语完成一个情景对话，再用泰语完成一个情景对话。一次只说一句，并纠正我的错误。`; navigator.clipboard?.writeText(prompt); window.open('https://chatgpt.com/', '_blank'); toast('本课 AI 练习指令已复制'); };
 $('#resetData').onclick = () => { if (confirm('确定清除这台手机上的所有学习记录吗？')) { data = defaults(); save(); toast('学习数据已清除'); } };
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=5');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
 render();
