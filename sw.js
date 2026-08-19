@@ -1,4 +1,4 @@
-const CACHE = 'taieng-coach-v4';
+const CACHE = 'taieng-coach-v5';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {
