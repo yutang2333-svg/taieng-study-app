@@ -1,5 +1,6 @@
 const KEY = 'taieng-coach-v2';
-const today = new Date().toISOString().slice(0, 10);
+function dateKey(date = new Date()) { const year = date.getFullYear(), month = String(date.getMonth() + 1).padStart(2, '0'), day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; }
+const today = dateKey();
 const course = [
   ['餐厅点餐','在餐厅礼貌点一餐。','Could I have this, please?|我想要这个，谢谢。','What do you recommend?|你推荐什么？','ขออันนี้ค่ะ|khǎaw an-níi khâ｜我想要这个。','อร่อยไหม|a-ròi mái｜好吃吗？'],
   ['咖啡店','点咖啡并说明口味。','I would like an iced latte.|我想要一杯冰拿铁。','Less sweet, please.|请少糖。','กาแฟเย็น|gaa-fae yen｜冰咖啡。','หวานน้อย|wǎan nói｜少甜。'],
@@ -67,7 +68,8 @@ const extraVocabulary = [
 const starterWords = [];
 const starterMistakes = [];
 function split(text) { const [word, ...meaning] = text.split('|'); return { word, meaning: meaning.join('|') }; }
-function currentIndex() { return Math.min(data.completedDates.length, course.length - 1); }
+function firstStudyDate(existing) { const dates = [...(existing.completedDates || []), ...Object.keys(existing.lessonChecks || {}), ...Object.keys(existing.audioCursor || {})].filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value)).sort(); return dates[0] || today; }
+function currentIndex() { const start = new Date(`${data.startDate}T00:00:00`), current = new Date(`${today}T00:00:00`), elapsedDays = Math.floor((current - start) / 86400000); return Math.min(Math.max(elapsedDays, 0), course.length - 1); }
 function plan() { const index = currentIndex(), raw = course[index], extra = extraVocabulary[index]; return { day: index + 1, theme: raw[0], goal: raw[1], en: [split(raw[2]), split(raw[3])], th: [split(raw[4]), split(raw[5])], enVocab: extra[0].map(split), thVocab: extra[1].map(split) }; }
 function dialogue(p, language) { return language === '英语' ? ['Hello. How can I help you?', p.en[0].word, 'Sure. Is there anything else?', p.en[1].word] : ['สวัสดีค่ะ ต้องการอะไร', p.th[0].word, 'ได้ค่ะ มีอะไรอีกไหม', p.th[1].word]; }
 function thaiChinese(item) { return item.meaning.split(/[｜|]/)[1] || item.meaning; }
@@ -85,8 +87,9 @@ function lessonParts(p) { const enDialogue = dialogue(p, '英语'), thDialogue =
   {title:'Thai substitution practice', detail:'Use the three new Thai words to make five complete sentences.', minutes:4, lang:'th-TH', audio:[voiceLine('Make five short Thai sentences with today’s new words.', 'en-US'), ...thExtra.map(x => voiceLine(x, 'th-TH'))], content:thExtra.join(' / ')},
   {title:'Thai dialogue and correction', detail:'Read the simple English meaning first. Then listen to four Thai turns and play the learner.', minutes:12, lang:'th-TH', audio:[voiceLine('Read the English meaning first. Then listen to the Thai conversation.', 'en-US'), ...thDialogue.map(x => voiceLine(x, 'th-TH'))], content:thDialogue.map((line, index) => `<b>${line}</b><br>English: ${thEnglish[index]}<br>中文：${thChinese[index]}`).join('<hr>')}
 ]; }
-function defaults() { return { words: starterWords, mistakes: starterMistakes, completedDates: [], lessonChecks: {}, activeFilter: 'all' }; }
+function defaults() { return { words: starterWords, mistakes: starterMistakes, completedDates: [], lessonChecks: {}, audioCursor: {}, activeFilter: 'all', startDate: today }; }
 let data = JSON.parse(localStorage.getItem(KEY) || 'null') || defaults();
+if (!data.startDate) { data.startDate = firstStudyDate(data); localStorage.setItem(KEY, JSON.stringify(data)); }
 const $ = s => document.querySelector(s);
 function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
 function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1900); }
@@ -115,5 +118,5 @@ $('#entryForm').addEventListener('submit', e => { e.preventDefault(); const type
 $('#finishLesson').onclick = () => { const parts = lessonParts(plan()), checks = data.lessonChecks[today] || []; if (checks.filter(Boolean).length < parts.length) { toast('请先完成并勾选所有听读环节'); return; } if (!data.completedDates.includes(today)) data.completedDates.push(today); save(); toast(data.completedDates.length < 30 ? '今天完成！明天将解锁下一课。' : '30 天课程全部完成，太棒了！'); };
 $('#openChatGPT').onclick = () => { const p = plan(); const prompt = `我是泰英口语教练的学习者。请和我练习第 ${p.day} 天「${p.theme}」。先让我用英语完成一个情景对话，再用泰语完成一个情景对话。一次只说一句，并纠正我的错误。`; navigator.clipboard?.writeText(prompt); window.open('https://chatgpt.com/', '_blank'); toast('本课 AI 练习指令已复制'); };
 $('#resetData').onclick = () => { if (confirm('确定清除这台手机上的所有学习记录吗？')) { data = defaults(); save(); toast('学习数据已清除'); } };
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=10');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=11');
 render();
